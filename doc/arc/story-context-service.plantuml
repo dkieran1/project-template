@@ -1,0 +1,46 @@
+@startuml
+
+!include <c4/C4_Component.puml>  
+
+LAYOUT_WITH_LEGEND()
+
+title
+<font size=28><u>Story Context</u></font>
+end title
+
+'left to right direction
+
+Person(amigos, Amigos, "Relevant stakeholder that will collaborate on requirement refinement." )
+
+System_Boundary(jira, "Jira Project"){
+    Component(story, "Story", "Component: Gherkin", "Ticket that contains scenarios describing feature / requirement.")
+    Container(jira_plugin, "Jira Story Plugin", "Container: javascript / forge", "Jira plugin that sends/exposes gherkin from ticket.")
+}
+
+System_Boundary(azure_app, "Azure App"){
+    Container(test_stub_gen, "Test Stub Generator", "Container: App Service / .NET Core", "Generate test stubs from gherkin and post/update software project source control.")
+    Container(requirements_gen, "QMS Requirements Generator", "Container: App Service / .NET Core", "Generate and store requirements based on templates in QMS source control.")
+}
+
+System_Boundary(github_software, "Github Software Project"){
+    Component(test_stubs, "Generated Test Stubs", "Component: cucumber/behave/whatever...", "Test stubs containing the scenarios/steps defined in requirements.")
+}
+
+System_Boundary(github_qms, "Github QMS Project"){
+    Container(publish_requirements, "Technical File Publish Pipeline", "Container: github action", "Publish updates to technical file in Sharepoint, Confluence etc...")
+    Component(qms_files, "Templated QMS Content", "Component: templates", "Templates containing content for QMS.")
+}
+
+Rel_D(amigos, story, "refines")
+
+Rel_R(story, jira_plugin, "uses")
+
+jira_plugin --> test_stub_gen : sends
+jira_plugin --> requirements_gen : sends
+
+test_stub_gen --> test_stubs : stores
+requirements_gen --> qms_files : stores
+
+Rel_L(publish_requirements, qms_files, "uses")
+
+@enduml

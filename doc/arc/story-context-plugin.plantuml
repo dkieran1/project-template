@@ -1,0 +1,39 @@
+@startuml
+
+!include <c4/C4_Component.puml>  
+
+LAYOUT_WITH_LEGEND()
+
+title
+<font size=28><u>Story Context</u></font>
+end title
+
+'left to right direction
+
+Person(amigos, Amigos, "Relevant stakeholder that will collaborate on requirement refinement." )
+
+System_Boundary(jira, "Jira Project"){
+    Component(story, "Story", "Component: Gherkin", "Ticket that contains scenarios describing feature / requirement.")
+    Container(jira_gherkin, "Jira Gherkin Plugin", "Container: javascript / forge", "Jira plugin that posts/updates gherkin from ticket to test stub source control.")
+    Container(jira_formatter, "Jira Requirement Formatter Plugin", "Container: javascript / forge", "Jira plugin that posts/updates requirements (QMS) source control.")
+}
+
+System_Boundary(github_software, "Github Software Project"){
+    Component(test_stubs, "Generated Test Stubs", "cucumber/behave/whatever...", "Test stubs containing the scenarios/steps defined in requirements.")
+}
+
+System_Boundary(github_qms, "Github QMS Project"){
+    Container(publish_requirements, "Technical File Publish Pipeline", "Container: github action", "Publish updates to technical file in Sharepoint, Confluence etc...")
+    Component(qms_files, "Templated QSM Content", "templates", "Templates containing content for QMS.")
+}
+
+Rel_D(amigos, story, "refines")
+
+Rel_R(story, jira_gherkin, "uses")
+Rel_D(story, jira_formatter, "uses")
+
+jira_gherkin --> test_stubs : stores
+jira_formatter --> qms_files : stores
+publish_requirements --> qms_files : uses
+
+@enduml
