@@ -3,23 +3,36 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace test_stub_gen
+using GitHub;
+using GitHub.Octokit.Client;
+using GitHub.Octokit.Client.Authentication;
+
+namespace TestStubGen;
+
+public class TestStubGen(ILogger<TestStubGen> logger)
 {
-    public class HttpTrigger
+    private static readonly TokenProvider tokenProvider = new TokenProvider(Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? "");
+    private static readonly Microsoft.Kiota.Abstractions.IRequestAdapter adapter = RequestAdapter.Create(new TokenAuthProvider(tokenProvider));
+    
+    [Function(nameof(TestStubGen))]
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
     {
-        private readonly ILogger<HttpTrigger> _logger;
+        logger.LogDebug("Entered test stub generator http trigger.");
 
-        public HttpTrigger(ILogger<HttpTrigger> logger)
-        {
-            _logger = logger;
-            _logger.LogInformation("Constructor called.");
-        }
+        var client = new GitHubClient(adapter);
 
-        [Function("HttpTrigger")]
-        public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+        var rv = "";
+
+        try
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
-            return new OkObjectResult("Welcome to Azure Functions!");
+            var response = await client.User.Repos.GetAsync();
+            response?.ForEach(repo => rv += repo.FullName);
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        
+        return new OkObjectResult(rv);
     }
 }

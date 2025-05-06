@@ -10,6 +10,11 @@ variable "subscription" {
   description = "Subscription ID"
 }
 
+variable "app_registration_client_id" {
+  type = string
+  description = "App Client Registration ID"
+}
+
 variable "environment" {
   type = string
   description = "Environment (dev / stage / prod)"
@@ -20,7 +25,7 @@ variable "location" {
   description = "Azure region to deploy module to"
 }
 
-variable "storagename" {
+variable "githubtoken" {
   type = string
-  description = "Last 24 chars of md5 sum of {project}-{environment}-storage"
+  description = "GitHub token for accessing project source repo"
 }
